@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Student GPA calculator and academic result manager">
+    <title>Student GPA</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">🎓</div>
+            <div>
+                <h1>Student GPA</h1>
+                <p>Your academic companion</p>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- HOME PAGE -->
+    <main id="dashboard" class="page active">
+
+        <h2 class="page-title">Welcome 👋</h2>
+
+        <!-- PLAN -->
+        <section class="plan-card">
+
+            <div class="plan-info">
+                <span class="plan-label">CURRENT PLAN</span>
+
+                <h3 id="dashboardPlan">FREE</h3>
+
+                <p id="dashboardPlanText">
+                    Limited features
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="upgrade-small"
+                onclick="showPremium()">
+                ⭐ Upgrade
+            </button>
+
+        </section>
+
+
+        <!-- STATISTICS -->
+        <section class="stats">
+
+            <div class="stat-card">
+                <span>Current GPA</span>
+                <strong id="dashboardGPA">0.00</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>CGPA</span>
+                <strong id="dashboardCGPA">0.00</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Semesters</span>
+                <strong id="dashboardSemesters">0</strong>
+            </div>
+
+        </section>
+
+
+        <!-- ADVERTISEMENT -->
+        <div class="ad-box">
+            <span>Advertisement</span>
+        </div>
+
+
+        <!-- STUDENT TOOLS -->
+        <section class="quick-card">
+
+            <h3>📚 Student Tools</h3>
+
+            <p>
+                Calculate your GPA, save your semester
+                results and track your academic progress.
+            </p>
+
+            <button
+                type="button"
+                onclick="showPage('calculator')">
+                Calculate GPA
+            </button>
+
+        </section>
+
+
+        <!-- PREMIUM -->
+        <section class="quick-card premium-card">
+
+            <h3>⭐ Premium</h3>
+
+            <p>
+                Unlock unlimited courses, unlimited
+                semesters and advanced academic tools.
+            </p>
+
+            <button
+                type="button"
+                class="premium-button"
+                onclick="showPremium()">
+                View Premium
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- GPA CALCULATOR PAGE -->
+    <main id="calculator" class="page">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>🧮 GPA Calculator</h2>
+
+                <p>
+                    Calculate your semester GPA
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="small-reset"
+                onclick="resetCalculator()">
+                Reset
+            </button>
+
+        </div>
+
+
+        <!-- COURSE LIMIT -->
+        <section class="limit-card">
+
+            <span>Courses</span>
+
+            <strong id="courseCounter">
+                0 / 5
+            </strong>
+
+        </section>
+
+
+        <!-- COURSES -->
+        <div id="courses"></div>
+
+
+        <!-- ADD COURSE -->
+        <button
+            type="button"
+            class="add-btn"
+            onclick="addCourse()">
+            + Add Course
+        </button>
+
+
+        <!-- CALCULATE -->
+        <button
+            type="button"
+            class="calculate-btn"
+            onclick="calculateGPA()">
+            Calculate GPA
+        </button>
+
+
+        <!-- GPA RESULT -->
+        <section class="result-card">
+
+            <span>Your GPA</span>
+
+            <strong id="gpa">
+                0.00
+            </strong>
+
+            <div class="result-details">
+
+                <div>
+                    <small>Total Units</small>
+                    <b id="totalUnits">0</b>
+                </div>
+
+                <div>
+                    <small>Total Points</small>
+                    <b id="totalPoints">0</b>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SAVE RESULT -->
+        <button
+            type="button"
+            class="save-btn"
+            onclick="saveSemester()">
+            💾 Save Semester Result
+        </button>
+
+
+        <div class="ad-box">
+            <span>Advertisement</span>
+        </div>
+
+    </main>
+
+
+    <!-- HISTORY PAGE -->
+    <main id="historyPage" class="page">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>📚 History</h2>
+
+                <p>
+                    Your saved academic records
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="small-reset"
+                onclick="clearResults()">
+                Clear
+            </button>
+
+        </div>
+
+
+        <!-- CGPA -->
+        <section class="cgpa-card">
+
+            <span>Your CGPA</span>
+
+            <strong id="cgpa">
+                0.00
+            </strong>
+
+            <p id="semesterCount">
+                No saved semesters
+            </p>
+
+        </section>
+
+
+        <!-- HISTORY LIST -->
+        <div id="history"></div>
+
+
+        <div class="ad-box">
+            <span>Advertisement</span>
+        </div>
+
+    </main>
+
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+
+        <button
+            type="button"
+            id="nav-dashboard"
+            class="nav-active"
+            onclick="showPage('dashboard')">
+
+            <span>🏠</span>
+            <small>Home</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            id="nav-calculator"
+            onclick="showPage('calculator')">
+
+            <span>🧮</span>
+            <small>GPA</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            id="nav-historyPage"
+            onclick="showPage('historyPage')">
+
+            <span>📚</span>
+            <small>History</small>
+
+        </button>
+
+    </nav>
+
+</div>
+
+
+<!-- PREMIUM MODAL -->
+<div
+    id="premiumModal"
+    class="modal"
+    aria-hidden="true">
+
+    <div class="modal-content">
+
+        <button
+            type="button"
+            class="close-btn"
+            onclick="closePremium()"
+            aria-label="Close">
+            ×
+        </button>
+
+
+        <div class="premium-icon">
+            ⭐
+        </div>
+
+
+        <h2>
+            Upgrade to Premium
+        </h2>
+
+
+        <p class="modal-subtitle">
+            Get the complete Student GPA experience.
+        </p>
+
+
+        <!-- TRIAL -->
+        <div class="trial-box">
+
+            <strong>
+                7 DAYS FREE
+            </strong>
+
+            <span>
+                Try Premium before subscribing.
+            </span>
+
+        </div>
+
+
+        <!-- BENEFITS -->
+        <div class="premium-benefits">
+
+            <div>✓ Unlimited courses</div>
+            <div>✓ Unlimited semesters</div>
+            <div>✓ Advanced statistics</div>
+            <div>✓ Target GPA planner</div>
+            <div>✓ Progress charts</div>
+            <div>✓ Export results</div>
+            <div>✓ Backup & restore</div>
+            <div>✓ Premium themes</div>
+            <div>✓ No advertisements</div>
+
+        </div>
+
+
+        <!-- PRICE -->
+        <div class="premium-price">
+
+            <span>
+                PREMIUM
+            </span>
+
+            <strong>
+                7-Day Free Trial
+            </strong>
+
+        </div>
+
+
+        <!-- TRIAL BUTTON -->
+        <button
+            type="button"
+            class="subscribe-btn"
+            onclick="startTrial()">
+            ⭐ Start 7-Day Free Trial
+        </button>
+
+
+        <!-- SUBSCRIBE -->
+        <button
+            type="button"
+            class="secondary-subscribe"
+            onclick="startSubscription()">
+            Subscribe to Premium
+        </button>
+
+
+        <p class="payment-note">
+            Secure payment will be connected to your
+            payment provider when the subscription system
+            is configured.
+        </p>
+
+    </div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
