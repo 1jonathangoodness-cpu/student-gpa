@@ -1,423 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="description" content="Student GPA calculator and academic result manager">
-    <title>Student GPA</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>Student GPA</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <div class="app">
 
-<div class="app">
+    <header class="hero">
+      <div class="hero-icon">🎓</div>
 
-    <!-- HEADER -->
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-icon">🎓</div>
-            <div>
-                <h1>Student GPA</h1>
-                <p>Your academic companion</p>
-            </div>
-        </div>
+      <div>
+        <h1>Student GPA</h1>
+        <p>Your academic companion</p>
+      </div>
     </header>
 
+    <main class="main-content">
 
-    <!-- HOME PAGE -->
-    <main id="dashboard" class="page active">
+      <!-- HOME SECTION -->
+      <section id="homeSection" class="page-section active">
+        <div class="welcome">
+          <p class="small-heading">WELCOME BACK</p>
+          <h2>Welcome 👋</h2>
+        </div>
 
-        <h2 class="page-title">Welcome 👋</h2>
+        <div class="plan-card">
+          <div>
+            <p class="eyebrow">CURRENT PLAN</p>
+            <h3 id="planName">FREE</h3>
+            <p id="planDescription">Limited features</p>
+          </div>
 
-        <!-- PLAN -->
-        <section class="plan-card">
+          <button id="upgradeButton" class="upgrade-button" type="button">
+            ⭐ Upgrade
+          </button>
+        </div>
 
-            <div class="plan-info">
-                <span class="plan-label">CURRENT PLAN</span>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Current GPA</span>
+            <strong id="currentGPA">0.00</strong>
+          </div>
 
-                <h3 id="dashboardPlan">FREE</h3>
+          <div class="stat-card">
+            <span>CGPA</span>
+            <strong id="cgpaValue">0.00</strong>
+          </div>
 
-                <p id="dashboardPlanText">
-                    Limited features
-                </p>
-            </div>
+          <div class="stat-card">
+            <span>Semesters</span>
+            <strong id="semesterCount">0</strong>
+          </div>
+        </div>
 
-            <button
-                type="button"
-                class="upgrade-small"
-                onclick="showPremium()">
-                ⭐ Upgrade
-            </button>
-
-        </section>
-
-
-        <!-- STATISTICS -->
-        <section class="stats">
-
-            <div class="stat-card">
-                <span>Current GPA</span>
-                <strong id="dashboardGPA">0.00</strong>
-            </div>
-
-            <div class="stat-card">
-                <span>CGPA</span>
-                <strong id="dashboardCGPA">0.00</strong>
-            </div>
-
-            <div class="stat-card">
-                <span>Semesters</span>
-                <strong id="dashboardSemesters">0</strong>
-            </div>
-
-        </section>
-
-
-        <!-- ADVERTISEMENT -->
         <div class="ad-box">
-            <span>Advertisement</span>
+          Advertisement
         </div>
 
+        <div class="content-card">
+          <h2>📚 Student Tools</h2>
+          <p>
+            Calculate your GPA, save your semester results and track your
+            academic progress easily.
+          </p>
 
-        <!-- STUDENT TOOLS -->
-        <section class="quick-card">
-
-            <h3>📚 Student Tools</h3>
-
-            <p>
-                Calculate your GPA, save your semester
-                results and track your academic progress.
-            </p>
-
-            <button
-                type="button"
-                onclick="showPage('calculator')">
-                Calculate GPA
-            </button>
-
-        </section>
-
-
-        <!-- PREMIUM -->
-        <section class="quick-card premium-card">
-
-            <h3>⭐ Premium</h3>
-
-            <p>
-                Unlock unlimited courses, unlimited
-                semesters and advanced academic tools.
-            </p>
-
-            <button
-                type="button"
-                class="premium-button"
-                onclick="showPremium()">
-                View Premium
-            </button>
-
-        </section>
-
-    </main>
-
-
-    <!-- GPA CALCULATOR PAGE -->
-    <main id="calculator" class="page">
-
-        <div class="section-heading">
-
-            <div>
-                <h2>🧮 GPA Calculator</h2>
-
-                <p>
-                    Calculate your semester GPA
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="small-reset"
-                onclick="resetCalculator()">
-                Reset
-            </button>
-
-        </div>
-
-
-        <!-- COURSE LIMIT -->
-        <section class="limit-card">
-
-            <span>Courses</span>
-
-            <strong id="courseCounter">
-                0 / 5
-            </strong>
-
-        </section>
-
-
-        <!-- COURSES -->
-        <div id="courses"></div>
-
-
-        <!-- ADD COURSE -->
-        <button
-            type="button"
-            class="add-btn"
-            onclick="addCourse()">
-            + Add Course
-        </button>
-
-
-        <!-- CALCULATE -->
-        <button
-            type="button"
-            class="calculate-btn"
-            onclick="calculateGPA()">
+          <button id="homeCalculateButton" class="primary-button" type="button">
             Calculate GPA
-        </button>
-
-
-        <!-- GPA RESULT -->
-        <section class="result-card">
-
-            <span>Your GPA</span>
-
-            <strong id="gpa">
-                0.00
-            </strong>
-
-            <div class="result-details">
-
-                <div>
-                    <small>Total Units</small>
-                    <b id="totalUnits">0</b>
-                </div>
-
-                <div>
-                    <small>Total Points</small>
-                    <b id="totalPoints">0</b>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- SAVE RESULT -->
-        <button
-            type="button"
-            class="save-btn"
-            onclick="saveSemester()">
-            💾 Save Semester Result
-        </button>
-
-
-        <div class="ad-box">
-            <span>Advertisement</span>
+          </button>
         </div>
 
-    </main>
+        <div class="content-card premium-card">
+          <h2>⭐ Premium</h2>
+          <p>
+            Unlock unlimited courses, unlimited semesters and advanced
+            academic tools.
+          </p>
 
+          <button id="premiumButton" class="secondary-button" type="button">
+            View Premium
+          </button>
+        </div>
+      </section>
 
-    <!-- HISTORY PAGE -->
-    <main id="historyPage" class="page">
-
+      <!-- GPA SECTION -->
+      <section id="gpaSection" class="page-section">
         <div class="section-heading">
+          <p class="small-heading">ACADEMIC TOOL</p>
+          <h2>📊 GPA Calculator</h2>
+          <p>Calculate your semester GPA.</p>
+        </div>
 
-            <div>
-                <h2>📚 History</h2>
+        <div class="content-card">
+          <div class="course-top">
+            <h2>Your Courses</h2>
+            <span id="courseCount">0 courses</span>
+          </div>
 
-                <p>
-                    Your saved academic records
-                </p>
-            </div>
+          <div id="coursesContainer"></div>
 
-            <button
-                type="button"
-                class="small-reset"
-                onclick="clearResults()">
-                Clear
+          <div class="button-row">
+            <button id="addCourseButton" class="secondary-button" type="button">
+              ＋ Add Course
             </button>
 
+            <button id="calculateButton" class="primary-button" type="button">
+              Calculate GPA
+            </button>
+          </div>
+
+          <div id="gpaMessage" class="message"></div>
+
+          <div class="gpa-result">
+            <span>Your GPA</span>
+            <strong id="gpaResult">0.00</strong>
+          </div>
         </div>
 
+        <div class="content-card">
+          <h2>💾 Save Result</h2>
 
-        <!-- CGPA -->
-        <section class="cgpa-card">
+          <label for="semesterName">Semester / Session</label>
 
-            <span>Your CGPA</span>
+          <input
+            id="semesterName"
+            type="text"
+            placeholder="e.g. 2025/2026 - Semester 1"
+          >
 
-            <strong id="cgpa">
-                0.00
-            </strong>
+          <button id="saveButton" class="primary-button full-button" type="button">
+            Save Semester Result
+          </button>
 
-            <p id="semesterCount">
-                No saved semesters
-            </p>
-
-        </section>
-
-
-        <!-- HISTORY LIST -->
-        <div id="history"></div>
-
-
-        <div class="ad-box">
-            <span>Advertisement</span>
+          <div id="saveMessage" class="message"></div>
         </div>
+      </section>
+
+      <!-- HISTORY SECTION -->
+      <section id="historySection" class="page-section">
+        <div class="section-heading">
+          <p class="small-heading">ACADEMIC RECORD</p>
+          <h2>📜 Saved Results</h2>
+          <p>View your saved semester results.</p>
+        </div>
+
+        <div class="content-card">
+          <div id="resultsList" class="results-list">
+            <p class="empty-message">No saved results yet.</p>
+          </div>
+
+          <button id="clearResultsButton" class="danger-button full-button" type="button">
+            Clear All Results
+          </button>
+        </div>
+      </section>
 
     </main>
 
+    <!-- PREMIUM MODAL -->
+    <div id="premiumModal" class="modal hidden">
+      <div class="modal-box">
+        <button id="closePremiumButton" class="close-button" type="button">
+          ×
+        </button>
+
+        <h2>⭐ Student GPA Premium</h2>
+
+        <p>Premium will include:</p>
+
+        <ul>
+          <li>Unlimited courses</li>
+          <li>Unlimited saved semesters</li>
+          <li>Advanced academic tools</li>
+          <li>No advertisements</li>
+        </ul>
+
+        <p class="premium-price">₦1,250 monthly</p>
+
+        <button id="paymentButton" class="primary-button full-button" type="button">
+          Continue
+        </button>
+
+        <p id="paymentMessage" class="message"></p>
+      </div>
+    </div>
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
+      <button class="nav-button active" data-section="homeSection" type="button">
+        <span>🏠</span>
+        <small>Home</small>
+      </button>
 
-        <button
-            type="button"
-            id="nav-dashboard"
-            class="nav-active"
-            onclick="showPage('dashboard')">
+      <button class="nav-button" data-section="gpaSection" type="button">
+        <span>🧮</span>
+        <small>GPA</small>
+      </button>
 
-            <span>🏠</span>
-            <small>Home</small>
-
-        </button>
-
-
-        <button
-            type="button"
-            id="nav-calculator"
-            onclick="showPage('calculator')">
-
-            <span>🧮</span>
-            <small>GPA</small>
-
-        </button>
-
-
-        <button
-            type="button"
-            id="nav-historyPage"
-            onclick="showPage('historyPage')">
-
-            <span>📚</span>
-            <small>History</small>
-
-        </button>
-
+      <button class="nav-button" data-section="historySection" type="button">
+        <span>📜</span>
+        <small>History</small>
+      </button>
     </nav>
 
-</div>
+  </div>
 
-
-<!-- PREMIUM MODAL -->
-<div
-    id="premiumModal"
-    class="modal"
-    aria-hidden="true">
-
-    <div class="modal-content">
-
-        <button
-            type="button"
-            class="close-btn"
-            onclick="closePremium()"
-            aria-label="Close">
-            ×
-        </button>
-
-
-        <div class="premium-icon">
-            ⭐
-        </div>
-
-
-        <h2>
-            Upgrade to Premium
-        </h2>
-
-
-        <p class="modal-subtitle">
-            Get the complete Student GPA experience.
-        </p>
-
-
-        <!-- TRIAL -->
-        <div class="trial-box">
-
-            <strong>
-                7 DAYS FREE
-            </strong>
-
-            <span>
-                Try Premium before subscribing.
-            </span>
-
-        </div>
-
-
-        <!-- BENEFITS -->
-        <div class="premium-benefits">
-
-            <div>✓ Unlimited courses</div>
-            <div>✓ Unlimited semesters</div>
-            <div>✓ Advanced statistics</div>
-            <div>✓ Target GPA planner</div>
-            <div>✓ Progress charts</div>
-            <div>✓ Export results</div>
-            <div>✓ Backup & restore</div>
-            <div>✓ Premium themes</div>
-            <div>✓ No advertisements</div>
-
-        </div>
-
-
-        <!-- PRICE -->
-        <div class="premium-price">
-
-            <span>
-                PREMIUM
-            </span>
-
-            <strong>
-                7-Day Free Trial
-            </strong>
-
-        </div>
-
-
-        <!-- TRIAL BUTTON -->
-        <button
-            type="button"
-            class="subscribe-btn"
-            onclick="startTrial()">
-            ⭐ Start 7-Day Free Trial
-        </button>
-
-
-        <!-- SUBSCRIBE -->
-        <button
-            type="button"
-            class="secondary-subscribe"
-            onclick="startSubscription()">
-            Subscribe to Premium
-        </button>
-
-
-        <p class="payment-note">
-            Secure payment will be connected to your
-            payment provider when the subscription system
-            is configured.
-        </p>
-
-    </div>
-
-</div>
-
-
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>

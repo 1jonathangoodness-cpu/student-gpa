@@ -1,395 +1,772 @@
-/* =========================================================
-   STUDENT GPA — SCRIPT
-   ========================================================= */
-
 "use strict";
 
-/* =========================
-   SETTINGS
-========================= */
+/* ================================
+   STUDENT GPA APP
+   DARK MODE ONLY
+================================ */
 
 const FREE_COURSE_LIMIT = 5;
 const FREE_SEMESTER_LIMIT = 2;
 
 const STORAGE_KEYS = {
-    semesters: "studentGpaSemesters",
-    premium: "studentGpaPremium",
-    trial: "studentGpaTrial"
+  results: "studentGpaResults",
+  premium: "studentGpaPremium"
 };
-
-
-/* =========================
-   APP STATE
-========================= */
 
 let courses = [];
 let currentGPA = 0;
-let currentTotalUnits = 0;
-let currentTotalPoints = 0;
+let isPremium = false;
 
-let savedSemesters = loadSemesters();
+/* ================================
+   SAFE ELEMENT HELPERS
+================================ */
 
-let isPremium =
-    localStorage.getItem(STORAGE_KEYS.premium) === "true";
-
-
-/* =========================
-   START APP
-========================= */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    initializeApp();
-
-});
-
-
-function initializeApp() {
-
-    updatePlanDisplay();
-
-    renderCourses();
-
-    renderHistory();
-
-    updateDashboard();
-
-    /*
-     * Start with one course so the calculator
-     * is immediately usable.
-     */
-    if (courses.length === 0) {
-        addCourse(true);
-    }
-
+function getElement(id) {
+  return document.getElementById(id);
 }
 
+function showMessage(id, message, color) {
+  const element = getElement(id);
 
-/* =========================
+  if (!element) {
+    return;
+  }
+
+  element.textContent = message;
+
+  if (color) {
+    element.style.color = color;
+  }
+}
+
+/* ================================
    STORAGE
-========================= */
+================================ */
 
-function loadSemesters() {
+function getSavedResults() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.results);
 
-    try {
-
-        const data =
-            localStorage.getItem(STORAGE_KEYS.semesters);
-
-        if (!data) {
-            return [];
-        }
-
-        const parsed = JSON.parse(data);
-
-        return Array.isArray(parsed) ? parsed : [];
-
-    } catch (error) {
-
-        console.error(
-            "Unable to load saved semesters:",
-            error
-        );
-
-        return [];
-
+    if (!saved) {
+      return [];
     }
 
+    const parsed = JSON.parse(saved);
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Could not read saved results:", error);
+    return [];
+  }
 }
 
-
-function saveSemestersToStorage() {
-
+function saveResultsToStorage(results) {
+  try {
     localStorage.setItem(
-        STORAGE_KEYS.semesters,
-        JSON.stringify(savedSemesters)
+      STORAGE_KEYS.results,
+      JSON.stringify(results)
     );
-
+  } catch (error) {
+    console.error("Could not save results:", error);
+  }
 }
 
+function loadPremiumStatus() {
+  try {
+    isPremium = localStorage.getItem(STORAGE_KEYS.premium) === "true";
+  } catch (error) {
+    isPremium = false;
+  }
 
-/* =========================
-   NAVIGATION
-========================= */
-
-function showPage(pageId) {
-
-    const pages =
-        document.querySelectorAll(".page");
-
-    pages.forEach(function (page) {
-
-        page.classList.remove("active");
-
-    });
-
-
-    const selectedPage =
-        document.getElementById(pageId);
-
-    if (!selectedPage) {
-
-        console.error(
-            "Page not found:",
-            pageId
-        );
-
-        return;
-
-    }
-
-
-    selectedPage.classList.add("active");
-
-
-    /*
-     * Update bottom navigation.
-     */
-
-    const navButtons =
-        document.querySelectorAll(".bottom-nav button");
-
-    navButtons.forEach(function (button) {
-
-        button.classList.remove("nav-active");
-
-    });
-
-
-    const navButton =
-        document.getElementById("nav-" + pageId);
-
-    if (navButton) {
-
-        navButton.classList.add("nav-active");
-
-    }
-
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-
-    updateDashboard();
-
+  updatePlanDisplay();
 }
-
-
-/* =========================
-   PLAN DISPLAY
-========================= */
 
 function updatePlanDisplay() {
+  const planName = getElement("planName");
+  const planDescription = getElement("planDescription");
 
-    const plan =
-        document.getElementById("dashboardPlan");
+  if (planName) {
+    planName.textContent = isPremium ? "PREMIUM" : "FREE";
+  }
 
-    const planText =
-        document.getElementById("dashboardPlanText");
-
-
-    if (!plan || !planText) {
-        return;
-    }
-
-
-    if (isPremium) {
-
-        plan.textContent = "PREMIUM ⭐";
-
-        planText.textContent =
-            "Full access to all features.";
-
-    } else {
-
-        plan.textContent = "FREE";
-
-        planText.textContent =
-            "Limited features.";
-
-    }
-
+  if (planDescription) {
+    planDescription.textContent = isPremium
+      ? "All features unlocked"
+      : "Limited features";
+  }
 }
 
+/* ================================
+   NAVIGATION
+================================ */
 
-/* =========================
-   ADD COURSE
-========================= */
+function showSection(sectionId) {
+  const sections = document.querySelectorAll(".page-section");
+  const navButtons = document.querySelectorAll(".nav-button");
 
-function addCourse(skipLimitCheck = false) {
+  sections.forEach(function (section) {
+    section.classList.remove("active");
+  });
 
-    if (
-        !isPremium &&
-        !skipLimitCheck &&
-        courses.length >= FREE_COURSE_LIMIT
-    ) {
+  navButtons.forEach(function (button) {
+    button.classList.remove("active");
+  });
 
-        alert(
-            "Free Mode allows a maximum of 5 courses per semester.\n\nUpgrade to Premium for unlimited courses."
-        );
+  const selectedSection = getElement(sectionId);
 
-        showPremium();
+  if (selectedSection) {
+    selectedSection.classList.add("active");
+  }
 
-        return;
-
+  navButtons.forEach(function (button) {
+    if (button.dataset.section === sectionId) {
+      button.classList.add("active");
     }
+  });
 
-
-    courses.push({
-
-        id:
-            Date.now() +
-            Math.floor(Math.random() * 100000),
-
-        name: "",
-
-        unit: 3,
-
-        grade: ""
-
-    });
-
-
-    renderCourses();
-
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
+/* ================================
+   COURSE MANAGEMENT
+================================ */
 
-/* =========================
-   REMOVE COURSE
-========================= */
+function addCourse() {
+  if (!isPremium && courses.length >= FREE_COURSE_LIMIT) {
+    showMessage(
+      "gpaMessage",
+      "Free users can add up to 5 courses. Upgrade for unlimited courses.",
+      "#fca5a5"
+    );
 
-function removeCourse(id) {
+    return;
+  }
 
-    if (courses.length <= 1) {
+  const newCourse = {
+    id: Date.now() + Math.random(),
+    name: "",
+    unit: 1,
+    grade: ""
+  };
 
-        alert(
-            "You need at least one course."
-        );
+  courses.push(newCourse);
 
-        return;
+  renderCourses();
 
-    }
-
-
-    courses =
-        courses.filter(function (course) {
-
-            return course.id !== id;
-
-        });
-
-
-    renderCourses();
-
+  showMessage("gpaMessage", "");
 }
 
+function removeCourse(courseId) {
+  courses = courses.filter(function (course) {
+    return String(course.id) !== String(courseId);
+  });
 
-/* =========================
-   RENDER COURSES
-========================= */
+  renderCourses();
+}
+
+function updateCourse(courseId, field, value) {
+  courses.forEach(function (course) {
+    if (String(course.id) === String(courseId)) {
+      if (field === "unit") {
+        const numberValue = Number(value);
+
+        course.unit = numberValue > 0 ? numberValue : 1;
+      } else {
+        course[field] = value;
+      }
+    }
+  });
+}
 
 function renderCourses() {
+  const container = getElement("coursesContainer");
+  const courseCount = getElement("courseCount");
 
-    const container =
-        document.getElementById("courses");
+  if (!container) {
+    return;
+  }
 
-    if (!container) {
-        return;
+  container.innerHTML = "";
+
+  if (courseCount) {
+    courseCount.textContent =
+      courses.length + (courses.length === 1 ? " course" : " courses");
+  }
+
+  if (courses.length === 0) {
+    const empty = document.createElement("p");
+
+    empty.className = "empty-message";
+    empty.textContent = "No courses added. Tap Add Course to begin.";
+
+    container.appendChild(empty);
+
+    return;
+  }
+
+  courses.forEach(function (course, index) {
+    const card = document.createElement("div");
+
+    card.className = "course-card";
+
+    const header = document.createElement("div");
+    header.className = "course-header";
+
+    const title = document.createElement("strong");
+    title.textContent = "Course " + (index + 1);
+
+    const removeButton = document.createElement("button");
+
+    removeButton.type = "button";
+    removeButton.className = "remove-course";
+    removeButton.textContent = "×";
+    removeButton.setAttribute("aria-label", "Remove course");
+
+    removeButton.addEventListener("click", function () {
+      removeCourse(course.id);
+    });
+
+    header.appendChild(title);
+    header.appendChild(removeButton);
+
+    const fields = document.createElement("div");
+    fields.className = "course-fields";
+
+    const nameGroup = document.createElement("div");
+    nameGroup.className = "field-group";
+
+    const nameLabel = document.createElement("label");
+    nameLabel.textContent = "Course Name";
+
+    const nameInput = document.createElement("input");
+
+    nameInput.type = "text";
+    nameInput.placeholder = "e.g. CSC 101";
+    nameInput.value = course.name;
+
+    nameInput.addEventListener("input", function () {
+      updateCourse(course.id, "name", nameInput.value);
+    });
+
+    nameGroup.appendChild(nameLabel);
+    nameGroup.appendChild(nameInput);
+
+    const unitGroup = document.createElement("div");
+    unitGroup.className = "field-group";
+
+    const unitLabel = document.createElement("label");
+    unitLabel.textContent = "Units";
+
+    const unitInput = document.createElement("input");
+
+    unitInput.type = "number";
+    unitInput.min = "1";
+    unitInput.max = "10";
+    unitInput.value = course.unit;
+
+    unitInput.addEventListener("input", function () {
+      updateCourse(course.id, "unit", unitInput.value);
+    });
+
+    unitGroup.appendChild(unitLabel);
+    unitGroup.appendChild(unitInput);
+
+    fields.appendChild(nameGroup);
+    fields.appendChild(unitGroup);
+
+    const gradeGroup = document.createElement("div");
+    gradeGroup.className = "field-group";
+    gradeGroup.style.marginTop = "12px";
+
+    const gradeLabel = document.createElement("label");
+    gradeLabel.textContent = "Grade";
+
+    const gradeSelect = document.createElement("select");
+
+    const gradeOptions = [
+      { value: "", text: "Select grade" },
+      { value: "A", text: "A - 5 points" },
+      { value: "B", text: "B - 4 points" },
+      { value: "C", text: "C - 3 points" },
+      { value: "D", text: "D - 2 points" },
+      { value: "E", text: "E - 1 point" },
+      { value: "F", text: "F - 0 points" }
+    ];
+
+    gradeOptions.forEach(function (optionData) {
+      const option = document.createElement("option");
+
+      option.value = optionData.value;
+      option.textContent = optionData.text;
+
+      if (course.grade === optionData.value) {
+        option.selected = true;
+      }
+
+      gradeSelect.appendChild(option);
+    });
+
+    gradeSelect.addEventListener("change", function () {
+      updateCourse(course.id, "grade", gradeSelect.value);
+    });
+
+    gradeGroup.appendChild(gradeLabel);
+    gradeGroup.appendChild(gradeSelect);
+
+    card.appendChild(header);
+    card.appendChild(fields);
+    card.appendChild(gradeGroup);
+
+    container.appendChild(card);
+  });
+}
+
+/* ================================
+   GPA CALCULATION
+================================ */
+
+function getGradePoint(grade) {
+  const gradePoints = {
+    A: 5,
+    B: 4,
+    C: 3,
+    D: 2,
+    E: 1,
+    F: 0
+  };
+
+  return gradePoints[grade];
+}
+
+function calculateGPA() {
+  if (courses.length === 0) {
+    showMessage(
+      "gpaMessage",
+      "Please add at least one course.",
+      "#fca5a5"
+    );
+
+    return;
+  }
+
+  let totalQualityPoints = 0;
+  let totalUnits = 0;
+
+  for (let i = 0; i < courses.length; i++) {
+    const course = courses[i];
+
+    if (!course.grade) {
+      showMessage(
+        "gpaMessage",
+        "Please select a grade for every course.",
+        "#fca5a5"
+      );
+
+      return;
     }
 
+    const units = Number(course.unit);
+    const gradePoint = getGradePoint(course.grade);
 
-    container.innerHTML = "";
+    if (!units || units < 1 || gradePoint === undefined) {
+      showMessage(
+        "gpaMessage",
+        "Please enter valid course units and grades.",
+        "#fca5a5"
+      );
 
+      return;
+    }
 
-    courses.forEach(function (course, index) {
+    totalUnits += units;
+    totalQualityPoints += units * gradePoint;
+  }
 
-        const card =
-            document.createElement("div");
+  if (totalUnits === 0) {
+    showMessage(
+      "gpaMessage",
+      "Total course units cannot be zero.",
+      "#fca5a5"
+    );
 
-        card.className = "course-card";
+    return;
+  }
 
+  currentGPA = totalQualityPoints / totalUnits;
 
-        card.innerHTML = `
+  const formattedGPA = currentGPA.toFixed(2);
 
-            <div class="course-header">
+  const gpaResult = getElement("gpaResult");
+  const currentGPAElement = getElement("currentGPA");
 
-                <strong>
-                    Course ${index + 1}
-                </strong>
+  if (gpaResult) {
+    gpaResult.textContent = formattedGPA;
+  }
 
-                <button
-                    type="button"
-                    class="remove-course"
-                    data-id="${course.id}"
-                    aria-label="Remove course">
-                    ×
-                </button>
+  if (currentGPAElement) {
+    currentGPAElement.textContent = formattedGPA;
+  }
 
-            </div>
+  showMessage(
+    "gpaMessage",
+    "GPA calculated successfully.",
+    "#86efac"
+  );
+}
 
+/* ================================
+   SAVE SEMESTER
+================================ */
 
-            <div class="course-fields">
+function saveSemester() {
+  if (courses.length === 0) {
+    showMessage(
+      "saveMessage",
+      "Please add courses before saving.",
+      "#fca5a5"
+    );
 
-                <div class="field-group">
+    return;
+  }
 
-                    <label>
-                        Course Name
-                    </label>
+  if (currentGPA === 0) {
+    calculateGPA();
 
-                    <input
-                        type="text"
-                        class="course-name"
-                        data-id="${course.id}"
-                        placeholder="e.g. CSC 101"
-                        value="${escapeAttribute(course.name)}"
-                        autocomplete="off">
+    if (currentGPA === 0) {
+      return;
+    }
+  }
 
-                </div>
+  const semesterInput = getElement("semesterName");
 
+  if (!semesterInput) {
+    return;
+  }
 
-                <div class="field-group">
+  const semesterName = semesterInput.value.trim();
 
-                    <label>
-                        Credit Unit
-                    </label>
+  if (!semesterName) {
+    showMessage(
+      "saveMessage",
+      "Please enter a semester or session name.",
+      "#fca5a5"
+    );
 
-                    <input
-                        type="number"
-                        class="course-unit"
-                        data-id="${course.id}"
-                        min="1"
-                        max="10"
-                        value="${course.unit}">
+    return;
+  }
 
-                </div>
+  const savedResults = getSavedResults();
 
+  if (!isPremium && savedResults.length >= FREE_SEMESTER_LIMIT) {
+    showMessage(
+      "saveMessage",
+      "Free users can save 2 semesters. Upgrade for unlimited semesters.",
+      "#fca5a5"
+    );
 
-                <div class="field-group">
+    return;
+  }
 
-                    <label>
-                        Grade
-                    </label>
+  const result = {
+    id: Date.now(),
+    semester: semesterName,
+    gpa: Number(currentGPA.toFixed(2)),
+    courses: courses.length,
+    date: new Date().toLocaleDateString()
+  };
 
-                    <select
-                        class="course-grade"
-                        data-id="${course.id}">
+  savedResults.push(result);
 
-                        <option value="">
-                            Select grade
-                        </option>
+  saveResultsToStorage(savedResults);
 
-                        <option value="A"
-                            ${course.grade === "A" ? "selected" : ""}>
-                            A - 5 points
-                        </option>
+  semesterInput.value = "";
 
-                        <option value="B"
-                            ${course.grade === "B" ? "selected" : ""}>
-                            B - 4 points
-                        </option>
+  renderResults();
+  updateDashboard();
 
-                        <option value="C"
-                            ${
+  showMessage(
+    "saveMessage",
+    "Semester result saved successfully.",
+    "#86efac"
+  );
+}
+
+/* ================================
+   HISTORY
+================================ */
+
+function renderResults() {
+  const resultsList = getElement("resultsList");
+
+  if (!resultsList) {
+    return;
+  }
+
+  const results = getSavedResults();
+
+  resultsList.innerHTML = "";
+
+  if (results.length === 0) {
+    const empty = document.createElement("p");
+
+    empty.className = "empty-message";
+    empty.textContent = "No saved results yet.";
+
+    resultsList.appendChild(empty);
+
+    return;
+  }
+
+  results.forEach(function (result) {
+    const card = document.createElement("div");
+
+    card.className = "result-card";
+
+    const top = document.createElement("div");
+    top.className = "result-card-top";
+
+    const information = document.createElement("div");
+
+    const title = document.createElement("h3");
+    title.textContent = result.semester;
+
+    const date = document.createElement("p");
+    date.textContent = "Saved: " + result.date;
+
+    const coursesText = document.createElement("p");
+    coursesText.textContent = "Courses: " + result.courses;
+
+    information.appendChild(title);
+    information.appendChild(date);
+    information.appendChild(coursesText);
+
+    const gpa = document.createElement("strong");
+
+    gpa.className = "result-gpa";
+    gpa.textContent = Number(result.gpa).toFixed(2);
+
+    top.appendChild(information);
+    top.appendChild(gpa);
+
+    const deleteButton = document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.className = "delete-result";
+    deleteButton.textContent = "Delete Result";
+
+    deleteButton.addEventListener("click", function () {
+      deleteResult(result.id);
+    });
+
+    card.appendChild(top);
+    card.appendChild(deleteButton);
+
+    resultsList.appendChild(card);
+  });
+}
+
+function deleteResult(resultId) {
+  const results = getSavedResults();
+
+  const filteredResults = results.filter(function (result) {
+    return String(result.id) !== String(resultId);
+  });
+
+  saveResultsToStorage(filteredResults);
+
+  renderResults();
+  updateDashboard();
+}
+
+function clearAllResults() {
+  const results = getSavedResults();
+
+  if (results.length === 0) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete all saved results?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  saveResultsToStorage([]);
+
+  renderResults();
+  updateDashboard();
+}
+
+/* ================================
+   DASHBOARD
+================================ */
+
+function calculateCGPA() {
+  const results = getSavedResults();
+
+  if (results.length === 0) {
+    return "0.00";
+  }
+
+  let total = 0;
+
+  results.forEach(function (result) {
+    total += Number(result.gpa);
+  });
+
+  return (total / results.length).toFixed(2);
+}
+
+function updateDashboard() {
+  const results = getSavedResults();
+
+  const cgpaValue = getElement("cgpaValue");
+  const semesterCount = getElement("semesterCount");
+
+  if (cgpaValue) {
+    cgpaValue.textContent = calculateCGPA();
+  }
+
+  if (semesterCount) {
+    semesterCount.textContent = results.length;
+  }
+}
+
+/* ================================
+   PREMIUM MODAL
+================================ */
+
+function openPremiumModal() {
+  const modal = getElement("premiumModal");
+
+  if (modal) {
+    modal.classList.remove("hidden");
+  }
+}
+
+function closePremiumModal() {
+  const modal = getElement("premiumModal");
+
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+}
+
+function startPayment() {
+  const paymentMessage = getElement("paymentMessage");
+
+  if (paymentMessage) {
+    paymentMessage.textContent =
+      "Flutterwave payment will be connected here next.";
+    paymentMessage.style.color = "#fcd34d";
+  }
+}
+
+/* ================================
+   EVENT LISTENERS
+================================ */
+
+function setupEventListeners() {
+  document.querySelectorAll(".nav-button").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const sectionId = button.dataset.section;
+
+      if (sectionId) {
+        showSection(sectionId);
+      }
+    });
+  });
+
+  const homeCalculateButton = getElement("homeCalculateButton");
+
+  if (homeCalculateButton) {
+    homeCalculateButton.addEventListener("click", function () {
+      showSection("gpaSection");
+
+      if (courses.length === 0) {
+        addCourse();
+      }
+    });
+  }
+
+  const addCourseButton = getElement("addCourseButton");
+
+  if (addCourseButton) {
+    addCourseButton.addEventListener("click", addCourse);
+  }
+
+  const calculateButton = getElement("calculateButton");
+
+  if (calculateButton) {
+    calculateButton.addEventListener("click", calculateGPA);
+  }
+
+  const saveButton = getElement("saveButton");
+
+  if (saveButton) {
+    saveButton.addEventListener("click", saveSemester);
+  }
+
+  const clearResultsButton = getElement("clearResultsButton");
+
+  if (clearResultsButton) {
+    clearResultsButton.addEventListener("click", clearAllResults);
+  }
+
+  const upgradeButton = getElement("upgradeButton");
+
+  if (upgradeButton) {
+    upgradeButton.addEventListener("click", openPremiumModal);
+  }
+
+  const premiumButton = getElement("premiumButton");
+
+  if (premiumButton) {
+    premiumButton.addEventListener("click", openPremiumModal);
+  }
+
+  const closePremiumButton = getElement("closePremiumButton");
+
+  if (closePremiumButton) {
+    closePremiumButton.addEventListener("click", closePremiumModal);
+  }
+
+  const paymentButton = getElement("paymentButton");
+
+  if (paymentButton) {
+    paymentButton.addEventListener("click", startPayment);
+  }
+
+  const modal = getElement("premiumModal");
+
+  if (modal) {
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        closePremiumModal();
+      }
+    });
+  }
+}
+
+/* ================================
+   START APP
+================================ */
+
+function initializeApp() {
+  loadPremiumStatus();
+  renderCourses();
+  renderResults();
+  updateDashboard();
+  setupEventListeners();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp);
+} else {
+  initializeApp();
+}
